@@ -1,0 +1,39 @@
+// videojs-pannellum-plugin.js
+(function(window, videojs) {
+    var Plugin = videojs.getPlugin('plugin');
+
+    // Define the Pannellum plugin
+    var PannellumPlugin = videojs.extend(Plugin, {
+        constructor: function(player, options) {
+            Plugin.call(this, player, options);
+
+            this.player = player;
+
+            // Initialize Pannellum viewer
+            this.viewer = pannellum.viewer(player.el(), {
+                type: 'equirectangular',
+                panorama: player.currentSrc(),
+                autoLoad: true,
+                showControls: false
+            });
+
+            // Listen for video.js play event to start Pannellum viewer
+            player.on('play', function() {
+                this.viewer.startAutoRotate();
+            }.bind(this));
+
+            // Listen for video.js pause event to stop Pannellum viewer
+            player.on('pause', function() {
+                this.viewer.stopAutoRotate();
+            }.bind(this));
+
+            // Update Pannellum viewer when video source changes
+            player.on('loadedmetadata', function() {
+                this.viewer.setPanorama(player.currentSrc());
+            }.bind(this));
+        }
+    });
+
+    // Register the plugin with video.js
+    videojs.registerPlugin('pannellum', PannellumPlugin);
+})(window, videojs);
